@@ -1,20 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Todo } from './todo/Todo';
 import './TodosList.scss';
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTodo, getTodos, toggleAll } from '../../store/todosAction';
 
 export function TodosList() {
+  const todoRef = useRef("");
+  const todos = useSelector(state => state.todosReducer.todos);
+  const dispatch = useDispatch();
+  const toggleChecker = useSelector(({todosReducer}) => todosReducer.toggleChecker);
+  
+  const api = axios.create({
+    baseURL: 'http://localhost:3001/api/todos',
+  })
 
-  // const [todos, setTodos] = useState([]);
-  const todos = [
-    {name: "test", shown: true},
-    {name: "test2", shown: false},
-    {name: "test3", shown: true},
-  ];
+  useEffect(() => {
+    dispatch(getTodos());
+  }, [dispatch]);
+
+  function addTodoHandler(e) {
+    e.preventDefault();
+    dispatch(addTodo({ content: todoRef.current.value, completed: false }));
+    todoRef.current.value = "";
+  }
 
   return <div className="todos-list">
-    <input placeholder="What needs to be done?" className="add-todo"></input>
-    {
-      todos.map(todo => <Todo name={todo.name} shown={todo.shown}></Todo>)
-    }
-  </div>
+      <form className="add-todo-container" onSubmit={(e) => addTodoHandler(e)}>
+        <div className="toggle-todos" onClick={() => dispatch(toggleAll(todos))}>
+          <div className={"triangle-down " + (!toggleChecker ? "transparent" : "" )}></div>
+        </div>
+        <input ref={todoRef} placeholder="What needs to be done?" className="add-todo"></input>
+      </form>
+      {
+        todos.map(todo => <Todo todo={todo} key={todo._id}></Todo>)
+      }
+    </div>
 }
