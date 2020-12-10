@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { deleteTodo, editCompleted, editTodo } from '../../../store/todosAction';
 import './Todo.scss';
@@ -16,14 +16,10 @@ export function Todo(props) {
   }
 
   return <div className="todo-component">
-    <input checked={props.todo.completed} onChange={() =>  dispatch(editCompleted(props.todo))} type="checkbox" className="checkbox"></input>
+    <input checked={props.todo.completed} onChange={() => dispatch(editCompleted(props.todo))} type="checkbox" className="checkbox"></input>
     <div onDoubleClick={() => editTodoHandler()} className="content-and-delete">
-      <div>
-        <label className={props.todo.completed ? " line" : ""} >{props.todo.content}</label>
-      </div>
-      <div>
-        <button onClick={() => dispatch(deleteTodo(props.todo._id))}>Delete</button>
-      </div>
+      <label className={props.todo.completed ? " line" : ""} >{props.todo.content}</label>
+      <button onClick={() => dispatch(deleteTodo(props.todo._id))}>Delete</button>
     </div>
   </div>
 }

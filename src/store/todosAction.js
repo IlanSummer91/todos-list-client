@@ -1,33 +1,43 @@
 
 import axios from 'axios';
 
-  const api = axios.create({
-    baseURL: 'http://localhost:3001/api/todos',
-  })
-
-export const getTodos = () => {
-  return async (dispatch) => {
-    const result = await fetchTodos();   
-      dispatch(setTodos(result));
-  }
-}
-
-const setTodos = todos => {
-  return {
-    type: 'SET_TODOS',
-    payload: todos
-  }
-}
+const api = axios.create({
+  baseURL: '/api/todos',
+})
 
 async function fetchTodos() {
   const response = await api.get("/");
   return response.data;
 }
 
+function allCompletedChcker(todos) {
+  return todos.every(todo => todo.completed);
+}
+
+export const getTodos = () => {
+  return async (dispatch) => {
+    const result = await fetchTodos();
+    const checker = allCompletedChcker(result);
+    const remainingTodos = result.filter(todo => !todo.completed).length;
+    dispatch(setTodos(result, checker, remainingTodos));
+  }
+}
+
+const setTodos = (todos, toggleChecker, remainingTodos) => {
+  return {
+    type: 'SET_TODOS',
+    payload: {
+      todos,
+      toggleChecker,
+      remainingTodos
+    }
+  }
+}
+
 export const deleteTodo = id => {
   return async dispatch => {
     const result = await api.delete(`/${id}`);
-    if(result.data.success){ 
+    if (result.data.success) {
       dispatch(deleteTodoAction(id));
     }
   }
@@ -56,8 +66,8 @@ const addTodoAction = todo => {
 
 export const editTodo = todo => {
   return async dispatch => {
-      await api.put(`/${todo._id}`, { content: todo.content });
-      dispatch(editTodoAction(todo));
+    await api.patch(`/${todo._id}`, { content: todo.content });
+    dispatch(editTodoAction(todo));
   }
 }
 const editTodoAction = todo => {
@@ -69,8 +79,9 @@ const editTodoAction = todo => {
 
 export const editCompleted = todo => {
   return async dispatch => {
-    await api.put(`/${todo._id}`, { completed: todo.completed ? false : true });
+    await api.patch(`/${todo._id}`, { completed: !todo.completed });
     dispatch(editCompletedAction(todo));
+    dispatch(getTodos());
   }
 }
 
@@ -83,18 +94,43 @@ const editCompletedAction = todo => {
 
 export const toggleAll = todos => {
   return async dispatch => {
-    const todosCompletedChecker = todos.every(todo => todo.completed); // all completed
-    const promiseArr = todos.map(async todo => {
-      await api.put(`/${todo._id}`,{completed: !todosCompletedChecker});
-      todo.completed = !todosCompletedChecker;
-    });
-    Promise.all(promiseArr).then(async () => await dispatch(getTodos())).then(() => dispatch(toggleAllAction(!todosCompletedChecker)));
+    const todosCompletedChecker = allCompletedChcker(todos);
+    await api.patch(`/toggleAll`, { completed: !todosCompletedChecker });
+    dispatch(toggleAllAction(todos));
   }
 }
 
-const toggleAllAction = (todosCompletedChecker) => {
+const toggleAllAction = todos => {
   return {
     type: 'TOGGLE_ALL',
-    payload: todosCompletedChecker
+    payload: todos
+  }
+}
+
+export const getActiveTodos = () => {
+  return async dispatch => {
+    const response = await api.get('/active').then(res => res.data);
+    dispatch(setActiveTodosAction(response));
+  }
+}
+
+const setActiveTodosAction = todos => {
+  return {
+    type: 'SET_ACTIVE_TODOS',
+    payload: todos
+  }
+}
+
+export const getCompletedTodos = () => {
+  return async dispatch => {
+    const response = await api.get('/completed').then(res => res.data)
+    dispatch(setCompletedTodosAction(response));
+  }
+}
+
+const setCompletedTodosAction = todos => {
+  return {
+    type: 'SET_COMPLETED_TODOS',
+    payload: todos
   }
 }
