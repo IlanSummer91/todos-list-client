@@ -21,6 +21,10 @@
       -webkit-text-stroke: 0.1px white;
       color: DodgerBlue;
     }
+
+    &.hidden {
+      display: none;
+    }
   }
 
   .checkbox-container {
