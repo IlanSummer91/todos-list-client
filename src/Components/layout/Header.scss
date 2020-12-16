@@ -1,8 +1,12 @@
 .header {
+  text-align: center;
+  width: 100%;
+
   .title {
     font-size: 100px;
-    color: red;
-    color: rgba(255, 0, 0, 0.253);
+    color: rgba(30, 144, 255, 0.5);
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
     margin: 0;
   }
 }

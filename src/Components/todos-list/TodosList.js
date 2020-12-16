@@ -9,22 +9,28 @@ export function TodosList() {
   const todos = useSelector(({todosReducer}) => todosReducer.todos);
   const dispatch = useDispatch();
   const toggleChecker = useSelector(({todosReducer}) => todosReducer.toggleChecker);
-
+  const mode = useSelector(({todosReducer}) => todosReducer.mode);
+  const todosArrayNotEmpty = useSelector(({todosReducer}) => todosReducer.todosArrayNotEmpty);
+  
   useEffect(() => {
     dispatch(getTodos());
   }, [dispatch]);
 
   function addTodoHandler(e) {
     e.preventDefault();
-    dispatch(addTodo({ content: todoRef.current.value, completed: false }));
+    const todo = { content: todoRef.current.value, completed: false };
+    dispatch(addTodo(todo, mode));
     todoRef.current.value = "";
   }
 
   return <div className="todos-list">
       <form className="add-todo-container" onSubmit={(e) => addTodoHandler(e)}>
-        <div className="toggle-todos" onClick={() => dispatch(toggleAll(todos))}>
+      {todosArrayNotEmpty ? (<div className="toggle-todos" onClick={() => dispatch(toggleAll(mode))}>
           <div className={"triangle-down " + (toggleChecker ? "" : "transparent" )}></div>
-        </div>
+        </div>) : 
+        (<div className="toggle-todos"></div>)
+      }
+        
         <input type="text" ref={todoRef} placeholder="What needs to be done?" className="add-todo"></input>
       </form>
       {

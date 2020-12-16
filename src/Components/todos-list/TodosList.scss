@@ -1,10 +1,11 @@
 .todos-list {
-  border: 1px solid gray;
+  border: 1px solid white;
   border-bottom: 0;
 
   .add-todo-container {
     display: flex;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid white;
+    
   }
 
   .toggle-todos {
@@ -18,11 +19,11 @@
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-top: 30px solid #555;
+    border-top: 30px solid white;
     transition: all 200ms ease-in-out;
 
     &.transparent {
-      border-top:30px solid rgba($color: #555, $alpha: 0.3);
+      border-top:30px solid rgba($color: white, $alpha: 0.3);
     }
   }
 
@@ -31,6 +32,12 @@
     height: 50px;
     font-size: 20px;
     border: 0;
+    background-color: rgb(30, 160, 250);
+    color: white;
+
+    &::placeholder {
+      color: white;
+    }
 
     &:focus {
       outline: none;

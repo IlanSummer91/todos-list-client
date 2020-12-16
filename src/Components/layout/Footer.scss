@@ -1,8 +1,76 @@
+.empty {
+  display: none;
+}
+
 .footer {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  border: 1px solid gray;
+  border: 1px solid white;
   border-top: 0;
   padding: 10px 15px;
+  box-shadow: 0px 10px 40px 0px rgba(30, 144, 255, 1);
+  background-color: rgb(30, 160, 250);
+
+  .todos-count {
+    color: white;
+    font-size: 18px;
+    font-weight: bolder;
+    width: 20%;
+  }
+
+  .filter-buttons-container {
+    display: flex;
+    width: 220px;
+    justify-content: space-between;
+  }
+
+  button {
+    cursor: pointer;
+    background-color: white;
+    border: 2px solid white;
+    transition: all 300ms ease-in-out;
+    color: rgb(30, 160, 250);
+    transform: scale(1.2);
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 10px;
+    
+    &:focus {
+      outline: none;
+    }
+
+    &:hover {
+      box-shadow: 0 0 20px 2px rgb(30, 120, 255);
+      color: rgb(30, 144, 255);
+    }
+  }
+
+  .filter-button {
+    border: 2px solid white;
+    background-color: DodgerBlue;
+    color: white;
+
+    &:hover {
+      box-shadow: 0 0 10px 2px rgb(210, 210, 255);
+      color: white;
+    }
+    
+  }
+
+  .clear-container {
+    width: 25%;
+  }
+
+  .clear-button {
+    margin-right: 5px;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 200ms ease-in-out;
+
+    &.shown {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
 }

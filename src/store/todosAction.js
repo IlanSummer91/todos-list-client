@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api/todos',
+  baseURL: 'http://localhost:3001/api/todos/',
 })
 
 async function fetchTodos() {
@@ -10,127 +10,96 @@ async function fetchTodos() {
   return response.data;
 }
 
-function allCompletedChcker(todos) {
-  return todos.every(todo => todo.completed);
-}
-
-export const getTodos = () => {
+export const getTodos = (mode = 'all') => {
   return async (dispatch) => {
-    const result = await fetchTodos();
-    const checker = allCompletedChcker(result);
-    const remainingTodos = result.filter(todo => !todo.completed).length;
-    dispatch(setTodos(result, checker, remainingTodos));
+    const allTodos = await fetchTodos();
+    let todos;
+    let toggleChecker;
+    switch(mode) {
+      case 'all': 
+        todos = allTodos;
+        break;
+      case 'active':
+        todos = await api.get('/active').then(res => res.data);
+        break;
+      case 'completed':
+        todos = await api.get('/completed').then(res => res.data);
+        break;
+      default: return;
+    }
+    dispatch(setMode(mode));
+    if(allTodos.length === 0) {
+      toggleChecker = false;
+    } else {
+      toggleChecker = allTodos.every(todo => todo.completed);
+    }
+    const remainingTodos = allTodos.filter(todo => !todo.completed).length;
+    const anyCompletedTodo = allTodos.find(todo => todo.completed);
+    const todosArrayNotEmpty = allTodos.length !== 0;
+    dispatch(setTodos(todos, toggleChecker, remainingTodos, anyCompletedTodo, todosArrayNotEmpty));
   }
 }
 
-const setTodos = (todos, toggleChecker, remainingTodos) => {
+const setTodos = (todos, toggleChecker, remainingTodos, anyCompletedTodo, todosArrayNotEmpty) => {
   return {
     type: 'SET_TODOS',
     payload: {
       todos,
       toggleChecker,
-      remainingTodos
+      remainingTodos,
+      anyCompletedTodo,
+      todosArrayNotEmpty
     }
   }
 }
 
-export const deleteTodo = id => {
+export const deleteTodo = (id, mode) => {
   return async dispatch => {
     const result = await api.delete(`/${id}`);
     if (result.data.success) {
-      dispatch(deleteTodoAction(id));
+      dispatch(getTodos(mode));
     }
   }
 }
 
-const deleteTodoAction = id => {
-  return {
-    type: 'DELETE_TODO',
-    payload: id
-  }
-}
-
-export const addTodo = todo => {
+export const addTodo = (todo, mode) => {
   return async dispatch => {
-    const updatedTodo = await api.post("/", todo);
-    dispatch(addTodoAction(updatedTodo.data));
+    await api.post("/", todo);
+    dispatch(getTodos(mode));
   }
 }
 
-const addTodoAction = todo => {
+export const setMode = mode => {
   return {
-    type: 'ADD_TODO',
-    payload: todo
+    type: 'SET_MODE',
+    payload: mode
   }
 }
 
-export const editTodo = todo => {
+export const editTodo = (todo, mode) => {
   return async dispatch => {
     await api.patch(`/${todo._id}`, { content: todo.content });
-    dispatch(editTodoAction(todo));
-  }
-}
-const editTodoAction = todo => {
-  return {
-    type: 'EDIT_TODO',
-    payload: todo.content
+    dispatch(getTodos(mode));
   }
 }
 
-export const editCompleted = todo => {
+export const editCompleted = (todo, mode) => {
   return async dispatch => {
     await api.patch(`/${todo._id}`, { completed: !todo.completed });
-    dispatch(editCompletedAction(todo));
-    dispatch(getTodos());
+    dispatch(getTodos(mode));
   }
 }
 
-const editCompletedAction = todo => {
-  return {
-    type: 'EDIT_COMPLETED',
-    payload: todo
-  }
-}
-
-export const toggleAll = todos => {
+export const toggleAll = mode => {
   return async dispatch => {
-    const todosCompletedChecker = allCompletedChcker(todos);
-    await api.patch(`/toggleAll`, { completed: !todosCompletedChecker });
-    dispatch(toggleAllAction(todos));
+    await api.patch(`/toggleAll`);
+    dispatch(getTodos(mode));
   }
 }
 
-const toggleAllAction = todos => {
-  return {
-    type: 'TOGGLE_ALL',
-    payload: todos
-  }
-}
-
-export const getActiveTodos = () => {
+export const deleteAllCompleted = mode => {
   return async dispatch => {
-    const response = await api.get('/active').then(res => res.data);
-    dispatch(setActiveTodosAction(response));
-  }
-}
-
-const setActiveTodosAction = todos => {
-  return {
-    type: 'SET_ACTIVE_TODOS',
-    payload: todos
-  }
-}
-
-export const getCompletedTodos = () => {
-  return async dispatch => {
-    const response = await api.get('/completed').then(res => res.data)
-    dispatch(setCompletedTodosAction(response));
-  }
-}
-
-const setCompletedTodosAction = todos => {
-  return {
-    type: 'SET_COMPLETED_TODOS',
-    payload: todos
+    await api.delete('/completed');
+    dispatch(getTodos(mode));
   }
 }

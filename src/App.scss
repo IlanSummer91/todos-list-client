@@ -4,7 +4,8 @@
 
 body {
   margin: 0;
-  background-color: rgba(255,255,255,0.6);
+  background-color: rgba(30, 144, 255, 0.2);
+  font-family: 'Helvetica', 'Arial', sans-serif;
 }
 
 #root {
@@ -18,4 +19,9 @@ body {
   justify-content: space-between;
   flex-direction: column;
   width: 550px;
+
+  .hint {
+    margin-top: 7%;
+    color: rgba(30, 144, 255, 0.7);
+  }
 }
